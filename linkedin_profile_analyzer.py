@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from flask import Flask, request, render_template, jsonify
 import os
 from werkzeug.utils import secure_filename
-from linkedin_profile_analyzer import LinkedInProfileAnalyzer
+# from linkedin_profile_analyzer import LinkedInProfileAnalyzer
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
