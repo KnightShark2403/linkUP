@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>linkUp - Landing</title>
+    <!-- Import Source Sans Pro font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Import Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <i class="fas fa-link"></i>linkUp
+        </a>
+        <div class="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links">
+            <a href="login.html">
+                <i class="fas fa-user-circle"></i>Profile
+            </a>
+        </div>
+    </nav>
+
+    <!-- Background elements -->
+    <div class="bg-grid"></div>
+    <div class="bg-dots"></div>
+    <div class="bg-container" id="bgContainer"></div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <h1><i class="fas fa-link"></i>linkUp</h1>
+        <button class="cta-button" onclick="window.location.href='login.html'">
+            <i class="fas fa-search"></i>Check Profile
+        </button>
+        
+        <!-- PDF Upload Section -->
+        <div class="pdf-upload-container">
+            <h2>Upload Your Resume</h2>
+            <div class="file-input-wrapper">
+                <input type="file" id="pdfUpload" accept=".pdf" class="file-input" />
+                <label for="pdfUpload" class="file-input-label">
+                    <i class="fas fa-file-pdf"></i>
+                    <span id="fileNameDisplay">Choose a PDF file</span>
+                </label>
+            </div>
+            <div id="uploadProgress" class="upload-progress hidden">
+                <div class="progress-bar"></div>
+            </div>
+            <button id="uploadButton" class="upload-button">
+                <i class="fas fa-cloud-upload-alt"></i>Upload PDF
+            </button>
+        </div>
+        
+        <!-- PDF Viewer Section -->
+        <div id="pdfViewerContainer" class="pdf-viewer-container hidden">
+            <div class="pdf-viewer-header">
+                <h2 id="pdfFileName">PDF Preview</h2>
+                <div class="pdf-controls">
+                    <button id="prevPage" class="page-control" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button id="nextPage" class="page-control" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button id="zoomIn" class="zoom-control">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button id="zoomOut" class="zoom-control">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+        </div>
+    </div>
+    
+    <!-- Add this CSS to your style.css file -->
+    <style>
+    /* PDF Upload Styling */
+    .pdf-upload-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        padding: 24px;
+        margin-top: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        max-width: 600px;
+        width: 100%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .pdf-upload-container h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        text-align: center;
+    }
+    
+    .file-input-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .file-input {
+        position: absolute;
+        left: -9999px;
+        opacity: 0;
+        width: 0.1px;
+        height: 0.1px;
+    }
+    
+    .file-input-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px dashed var(--accent-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-color);
+        font-weight: 500;
+        height: 60px;
+    }
+    
+    .file-input-label:hover, .file-input-label:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--primary-color);
+    }
+    
+    .file-input-label i {
+        font-size: 1.5rem;
+        margin-right: 10px;
+        color: var(--accent-color);
+    }
+    
+    .upload-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 24px;
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        width: 100%;
+    }
+    
+    .upload-button:hover {
+        background: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .upload-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .upload-button i {
+        margin-right: 8px;
+    }
+    
+    .upload-progress {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: var(--accent-color);
+        transition: width 0.3s ease;
+    }
+    
+    .hidden {
+        display: none;
+    }
+    </style>
+    <script>
+        src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"
+        
+        // Mobile menu toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 10) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        
+        // Close mobile menu when clicking a link
+        const links = document.querySelectorAll('.nav-links a');
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+        
+        // Button click effect
+        const ctaButton = document.querySelector('.cta-button');
+        ctaButton.addEventListener('mousedown', () => {
+            ctaButton.style.transform = 'translateY(-1px)';
+        });
+        
+        ctaButton.addEventListener('mouseup', () => {
+            ctaButton.style.transform = 'translateY(-3px)';
+        });
+        
+        // Interactive background
+        const bgContainer = document.getElementById('bgContainer');
+        const shapes = ['square', 'line', 'circle', 'dot'];
+        const elementCount = 30; // Number of background elements
+        
+        // Create background elements
+        for (let i = 0; i < elementCount; i++) {
+            const element = document.createElement('div');
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            element.className = `bg-element ${shape}`;
+            element.style.left = `${Math.random() * 100}%`;
+            element.style.top = `${Math.random() * 100}%`;
+            
+            // Random rotation for some elements
+            if (shape === 'square' || shape === 'line') {
+                element.style.transform = `rotate(${Math.random() * 360}deg)`;
+            }
+            
+            // Store original position data for mouse movement calculations
+            element.dataset.originalLeft = element.style.left;
+            element.dataset.originalTop = element.style.top;
+            element.dataset.speed = (Math.random() * 0.03 + 0.01).toFixed(3); // Random movement speed
+            
+            bgContainer.appendChild(element);
+        }
+        
+        // Interactive mouse movement effect
+        // Interactive mouse movement effect
+// Interactive mouse movement effect
+document.addEventListener('mousemove', (e) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    // Calculate mouse position as percentage of window dimensions
+    const mouseXPercent = mouseX / windowWidth;
+    const mouseYPercent = mouseY / windowHeight;
+    
+    // Move each element relative to mouse position
+    const elements = document.querySelectorAll('.bg-element');
+    elements.forEach(element => {
+        // Get the element's original position and speed
+        const originalLeft = parseFloat(element.dataset.originalLeft);
+        const originalTop = parseFloat(element.dataset.originalTop);
+        const speed = parseFloat(element.dataset.speed);
+        
+        // Calculate new position based on mouse movement
+        // Move element away from mouse position
+        const moveX = (mouseXPercent - 0.5) * 100 * speed;
+        const moveY = (mouseYPercent - 0.5) * 100 * speed;
+        
+        // Apply the transformation
+        element.style.transform = element.style.transform || '';
+        element.style.transform = element.style.transform.replace(/translate\([^)]*\)/, '');
+        element.style.transform += ` translate(${moveX}px, ${moveY}px)`;
+    });
+});
+
+// Add parallax effect on scroll
+window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    
+    const elements = document.querySelectorAll('.bg-element');
+    elements.forEach(element => {
+        const speed = parseFloat(element.dataset.speed) * 2;
+        const moveY = scrollY * speed;
+        
+        // Apply vertical movement based on scroll
+        element.style.transform = element.style.transform || '';
+        element.style.transform = element.style.transform.replace(/translateY\([^)]*\)/, '');
+        element.style.transform += ` translateY(${moveY}px)`;
+    });
+});
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+// PDF Upload and Viewer functionality
+const pdfUpload = document.getElementById('pdfUpload');
+const fileNameDisplay = document.getElementById('fileNameDisplay');
+const uploadButton = document.getElementById('uploadButton');
+const uploadProgress = document.getElementById('uploadProgress');
+const progressBar = document.querySelector('.progress-bar');
+const pdfViewerContainer = document.getElementById('pdfViewerContainer');
+const pdfFileName = document.getElementById('pdfFileName');
+const pdfCanvas = document.getElementById('pdfCanvas');
+const prevPageButton = document.getElementById('prevPage');
+const nextPageButton = document.getElementById('nextPage');
+const pageInfo = document.getElementById('pageInfo');
+const zoomInButton = document.getElementById('zoomIn');
+const zoomOutButton = document.getElementById('zoomOut');
+
+// PDF rendering variables
+let pdfDoc = null;
+let pageNum = 1;
+let pageRendering = false;
+let pageNumPending = null;
+let scale = 1.5;
+let ctx = pdfCanvas.getContext('2d');
+
+// Listen for file selection
+pdfUpload.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        if (file.type !== 'application/pdf') {
+            alert('Please select a valid PDF file.');
+            resetUploadForm();
+            return;
+        }
+        
+        const fileName = file.name;
+        fileNameDisplay.textContent = fileName;
+        uploadButton.disabled = false;
+        
+        // Animate the label to show selection
+        const label = document.querySelector('.file-input-label');
+        label.style.borderColor = 'var(--primary-color)';
+        label.style.background = 'rgba(255, 255, 255, 0.2)';
+    } else {
+        resetUploadForm();
+    }
+});
+
+// Handle upload button click
+uploadButton.addEventListener('click', () => {
+    if (pdfUpload.files.length === 0) return;
+    
+    const file = pdfUpload.files[0];
+    
+    // Show progress
+    uploadProgress.classList.remove('hidden');
+    uploadButton.disabled = true;
+    
+    // Simulate upload progress
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 5;
+        progressBar.style.width = `${progress}%`;
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            // Load the PDF
+            loadPDF(file);
+        }
+    }, 100);
+});
+
+// Load and render PDF
+function loadPDF(file) {
+    const fileReader = new FileReader();
+    
+    fileReader.onload = function(event) {
+        const typedarray = new Uint8Array(event.target.result);
+        
+        // Load the PDF using PDF.js
+        pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+            pdfDoc = pdf;
+            pdfFileName.textContent = file.name;
+            pageInfo.textContent = `Page ${pageNum} of ${pdf.numPages}`;
+            
+            // Enable/disable page navigation
+            prevPageButton.disabled = pageNum <= 1;
+            nextPageButton.disabled = pageNum >= pdf.numPages;
+            
+            // Render the first page
+            renderPage(pageNum);
+            
+            // Show the PDF viewer
+            pdfViewerContainer.classList.remove('hidden');
+            
+            // Hide upload progress
+            uploadProgress.classList.add('hidden');
+            
+            // Re-enable upload button
+            uploadButton.disabled = false;
+        }).catch(function(error) {
+            console.error('Error loading PDF:', error);
+            alert('Error loading PDF: ' + error.message);
+            uploadProgress.classList.add('hidden');
+            uploadButton.disabled = false;
+        });
+    };
+    
+    fileReader.readAsArrayBuffer(file);
+}
+
+// Render a specific page
+function renderPage(num) {
+    pageRendering = true;
+    
+    // Using promise to fetch the page
+    pdfDoc.getPage(num).then(function(page) {
+        const viewport = page.getViewport({ scale: scale });
+        pdfCanvas.height = viewport.height;
+        pdfCanvas.width = viewport.width;
+        
+        // Render PDF page into canvas context
+        const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+        };
+        
+        const renderTask = page.render(renderContext);
+        
+        // Wait for rendering to finish
+        renderTask.promise.then(function() {
+            pageRendering = false;
+            
+            if (pageNumPending !== null) {
+                // New page rendering is pending
+                renderPage(pageNumPending);
+                pageNumPending = null;
+            }
+        });
+    });
+    
+    // Update page counters
+    pageInfo.textContent = `Page ${num} of ${pdfDoc.numPages}`;
+    
+    // Update button states
+    prevPageButton.disabled = num <= 1;
+    nextPageButton.disabled = num >= pdfDoc.numPages;
+}
+
+// Go to previous page
+function goPrevPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    queueRenderPage(pageNum);
+}
+
+// Go to next page
+function goNextPage() {
+    if (pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    queueRenderPage(pageNum);
+}
+
+// Queue the page rendering if another page is currently rendering
+function queueRenderPage(num) {
+    if (pageRendering) {
+        pageNumPending = num;
+    } else {
+        renderPage(num);
+    }
+}
+
+// Zoom in
+function zoomIn() {
+    scale += 0.25;
+    renderPage(pageNum);
+}
+
+// Zoom out
+function zoomOut() {
+    if (scale <= 0.5) return;
+    scale -= 0.25;
+    renderPage(pageNum);
+}
+
+// Add event listeners for controls
+prevPageButton.addEventListener('click', goPrevPage);
+nextPageButton.addEventListener('click', goNextPage);
+zoomInButton.addEventListener('click', zoomIn);
+zoomOutButton.addEventListener('click', zoomOut);
+
+// Reset the form
+function resetUploadForm() {
+    fileNameDisplay.textContent = 'Choose a PDF file';
+    uploadButton.disabled = true;
+    uploadProgress.classList.add('hidden');
+    progressBar.style.width = '0%';
+    
+    const label = document.querySelector('.file-input-label');
+    label.style.borderColor = 'var(--accent-color)';
+    label.style.background = 'rgba(255, 255, 255, 0.1)';
+}
+
+// Add drag and drop functionality
+const fileInputLabel = document.querySelector('.file-input-label');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    fileInputLabel.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    fileInputLabel.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    fileInputLabel.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight() {
+    fileInputLabel.style.borderColor = 'var(--primary-color)';
+    fileInputLabel.style.background = 'rgba(255, 255, 255, 0.25)';
+}
+
+function unhighlight() {
+    fileInputLabel.style.borderColor = 'var(--accent-color)';
+    fileInputLabel.style.background = 'rgba(255, 255, 255, 0.1)';
+}
+
+fileInputLabel.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0 && files[0].type === 'application/pdf') {
+        pdfUpload.files = files;
+        fileNameDisplay.textContent = files[0].name;
+        uploadButton.disabled = false;
+        
+        // Highlight the upload button
+        const label = document.querySelector('.file-input-label');
+        label.style.borderColor = 'var(--primary-color)';
+        label.style.background = 'rgba(255, 255, 255, 0.2)';
+    } else {
+        alert('Please upload a PDF file');
+    }
+}
+
+// Handle keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (!pdfDoc) return;
+    
+    if (e.key === 'ArrowLeft') {
+        goPrevPage();
+    } else if (e.key === 'ArrowRight') {
+        goNextPage();
+    }
+});
+// Add subtle animation to background elements
+const animateElements = () => {
+    const elements = document.querySelectorAll('.bg-element');
+    elements.forEach(element => {
+        const randomOffset = (Math.random() - 0.5) * 5;
+        
+        // Add subtle floating effect
+        element.style.transform = element.style.transform || '';
+        element.style.transform += ` translate(${randomOffset}px, ${randomOffset}px)`;
+        
+        // Reset after animation completes
+        setTimeout(() => {
+            element.style.transform = element.style.transform.replace(/translate\([^)]*\)/, '');
+        }, 5000);
+    });
+    
+    // Continue animation loop
+    setTimeout(animateElements, 5000);
+};
+
+// Start animation loop
+animateElements();
