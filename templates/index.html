@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>linkUp - Landing</title>
+    <title>linkUp - Resume Assistant</title>
     <!-- Import Source Sans Pro font from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- Import Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6e57ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="linkUp">
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
 </head>
 <body>
     <!-- Navigation bar -->
     <nav class="navbar">
-        <a href="#" class="logo">
+        <a href="index.html" class="logo">
             <i class="fas fa-link"></i>linkUp
         </a>
         <div class="menu-toggle">
@@ -24,7 +32,10 @@
             <span></span>
         </div>
         <div class="nav-links">
-            <a href="login.html">
+            <a href="index.html" class="active">
+                <i class="fas fa-home"></i>Home
+            </a>
+            <a href="loginsignup.html">
                 <i class="fas fa-user-circle"></i>Profile
             </a>
         </div>
@@ -38,9 +49,13 @@
     <!-- Main content -->
     <div class="main-content">
         <h1><i class="fas fa-link"></i>linkUp</h1>
-        <button class="cta-button" onclick="window.location.href='login.html'">
-            <i class="fas fa-search"></i>Check Profile
-        </button>
+        <p class="tagline">Connect your resume to opportunities with AI-powered insights</p>
+        
+        <div class="action-buttons">
+            <button class="cta-button" onclick="window.location.href='login.html'">
+                <i class="fas fa-user-circle"></i>Check Profile
+            </button>
+        </div>
         
         <!-- PDF Upload Section -->
         <div class="pdf-upload-container">
@@ -55,7 +70,7 @@
             <div id="uploadProgress" class="upload-progress hidden">
                 <div class="progress-bar"></div>
             </div>
-            <button id="uploadButton" class="upload-button">
+            <button id="uploadButton" class="upload-button" disabled>
                 <i class="fas fa-cloud-upload-alt"></i>Upload PDF
             </button>
         </div>
@@ -83,123 +98,124 @@
             <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
         </div>
     </div>
+    <!-- Add this right after the PDF Viewer Section in your HTML -->
+<div id="analysisResultsContainer" class="analysis-results-container hidden">
+    <div class="results-header">
+        <h2><i class="fas fa-chart-bar"></i> Resume Analysis Results</h2>
+    </div>
     
-    <!-- Add this CSS to your style.css file -->
-    <style>
-    /* PDF Upload Styling */
-    .pdf-upload-container {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(8px);
-        border-radius: 12px;
-        padding: 24px;
-        margin-top: 40px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        max-width: 600px;
-        width: 100%;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-    
-    .pdf-upload-container h2 {
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-        color: var(--primary-color);
-        text-align: center;
-    }
-    
-    .file-input-wrapper {
-        position: relative;
-        margin-bottom: 20px;
-    }
-    
-    .file-input {
-        position: absolute;
-        left: -9999px;
-        opacity: 0;
-        width: 0.1px;
-        height: 0.1px;
-    }
-    
-    .file-input-label {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px 20px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px dashed var(--accent-color);
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: var(--text-color);
-        font-weight: 500;
-        height: 60px;
-    }
-    
-    .file-input-label:hover, .file-input-label:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: var(--primary-color);
-    }
-    
-    .file-input-label i {
-        font-size: 1.5rem;
-        margin-right: 10px;
-        color: var(--accent-color);
-    }
-    
-    .upload-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px 24px;
-        background: var(--accent-color);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 10px;
-        width: 100%;
-    }
-    
-    .upload-button:hover {
-        background: var(--primary-color);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .upload-button:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-    
-    .upload-button i {
-        margin-right: 8px;
-    }
-    
-    .upload-progress {
-        height: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 15px;
-    }
-    
-    .progress-bar {
-        height: 100%;
-        width: 0%;
-        background: var(--accent-color);
-        transition: width 0.3s ease;
-    }
-    
-    .hidden {
-        display: none;
-    }
-    </style>
-    <script>
-        src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"
+    <div class="results-content">
+        <!-- Overall Score -->
+        <div class="score-card">
+            <div class="score-circle">
+                <div id="overallScore" class="score-value">0</div>
+            </div>
+            <div class="score-text">
+                <h3 id="matchLevel">No Results</h3>
+                <p>Match for <span id="jobRoleDisplay">Software Engineer</span></p>
+            </div>
+        </div>
         
+        <!-- Detailed Analysis Tabs -->
+        <div class="analysis-tabs">
+            <div class="tab-headers">
+                <button class="tab-button active" data-tab="skills">Skills</button>
+                <button class="tab-button" data-tab="strengths">Strengths</button>
+                <button class="tab-button" data-tab="weaknesses">Improvement Areas</button>
+                <button class="tab-button" data-tab="verification">Verification</button>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Skills Analysis -->
+                <div class="tab-panel active" id="skillsPanel">
+                    <h3>Skills Assessment</h3>
+                    <div id="skillsChart" class="skills-chart">
+                        <!-- Skills bars will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Strengths Analysis -->
+                <div class="tab-panel" id="strengthsPanel">
+                    <h3>Profile Strengths</h3>
+                    <ul id="strengthsList" class="list-items">
+                        <!-- Strengths will be added here dynamically -->
+                    </ul>
+                </div>
+                
+                <!-- Weaknesses Analysis -->
+                <div class="tab-panel" id="weaknessesPanel">
+                    <h3>Areas for Improvement</h3>
+                    <ul id="weaknessesList" class="list-items">
+                        <!-- Weaknesses will be added here dynamically -->
+                    </ul>
+                </div>
+                
+                <!-- Verification Analysis -->
+                <div class="tab-panel" id="verificationPanel">
+                    <h3>Profile Verification</h3>
+                    
+                    <div class="verification-item">
+                        <div class="verification-header">
+                            <i class="fas fa-robot"></i>
+                            <h4>AI Content Detection</h4>
+                            <span id="aiDetectionBadge" class="badge">Low</span>
+                        </div>
+                        <div class="verification-details">
+                            <p id="aiDetectionText">No AI generated content detected.</p>
+                            <ul id="aiReasonsList" class="reasons-list">
+                                <!-- AI detection reasons will be added here -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="verification-item">
+                        <div class="verification-header">
+                            <i class="fas fa-certificate"></i>
+                            <h4>Certificate Verification</h4>
+                            <span id="certVerificationBadge" class="badge">Valid</span>
+                        </div>
+                        <div class="verification-details">
+                            <p id="certVerificationText">Certificates appear to be valid.</p>
+                            <ul id="certReasonsList" class="reasons-list">
+                                <!-- Certificate reasons will be added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Job Recommendations -->
+        <div class="recommendations-section">
+            <h3>Recommendations</h3>
+            <div id="recommendationsContent" class="recommendations-content">
+                <p>Based on your profile, we recommend the following improvements:</p>
+                <ul id="recommendationsList" class="recommendations-list">
+                    <!-- Recommendations will be added here dynamically -->
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="actions-footer">
+            <button id="downloadReport" class="action-button">
+                <i class="fas fa-download"></i> Download Report
+            </button>
+            <button id="closeAnalysis" class="action-button secondary">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+    </div>
+</div>
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 linkUp. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Set PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
         // Mobile menu toggle
         const menuToggle = document.querySelector('.menu-toggle');
         const navLinks = document.querySelector('.nav-links');
@@ -217,7 +233,6 @@
                 navbar.classList.remove('scrolled');
             }
         });
-        
         
         // Close mobile menu when clicking a link
         const links = document.querySelectorAll('.nav-links a');
@@ -265,102 +280,106 @@
         }
         
         // Interactive mouse movement effect
-        // Interactive mouse movement effect
-// Interactive mouse movement effect
-document.addEventListener('mousemove', (e) => {
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    
-    // Calculate mouse position as percentage of window dimensions
-    const mouseXPercent = mouseX / windowWidth;
-    const mouseYPercent = mouseY / windowHeight;
-    
-    // Move each element relative to mouse position
-    const elements = document.querySelectorAll('.bg-element');
-    elements.forEach(element => {
-        // Get the element's original position and speed
-        const originalLeft = parseFloat(element.dataset.originalLeft);
-        const originalTop = parseFloat(element.dataset.originalTop);
-        const speed = parseFloat(element.dataset.speed);
-        
-        // Calculate new position based on mouse movement
-        // Move element away from mouse position
-        const moveX = (mouseXPercent - 0.5) * 100 * speed;
-        const moveY = (mouseYPercent - 0.5) * 100 * speed;
-        
-        // Apply the transformation
-        element.style.transform = element.style.transform || '';
-        element.style.transform = element.style.transform.replace(/translate\([^)]*\)/, '');
-        element.style.transform += ` translate(${moveX}px, ${moveY}px)`;
-    });
-});
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Calculate mouse position as percentage of window dimensions
+            const mouseXPercent = mouseX / windowWidth;
+            const mouseYPercent = mouseY / windowHeight;
+            
+            // Move each element relative to mouse position
+            const elements = document.querySelectorAll('.bg-element');
+            elements.forEach(element => {
+                // Get the element's original position and speed
+                const originalLeft = parseFloat(element.dataset.originalLeft);
+                const originalTop = parseFloat(element.dataset.originalTop);
+                const speed = parseFloat(element.dataset.speed);
+                
+                // Calculate new position based on mouse movement
+                // Move element away from mouse position
+                const moveX = (mouseXPercent - 0.5) * 100 * speed;
+                const moveY = (mouseYPercent - 0.5) * 100 * speed;
+                
+                // Apply the transformation
+                element.style.transform = element.style.transform || '';
+                element.style.transform = element.style.transform.replace(/translate\([^)]*\)/, '');
+                element.style.transform += ` translate(${moveX}px, ${moveY}px)`;
+            });
+        });
 
-// Add parallax effect on scroll
-window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    
-    const elements = document.querySelectorAll('.bg-element');
-    elements.forEach(element => {
-        const speed = parseFloat(element.dataset.speed) * 2;
-        const moveY = scrollY * speed;
-        
-        // Apply vertical movement based on scroll
-        element.style.transform = element.style.transform || '';
-        element.style.transform = element.style.transform.replace(/translateY\([^)]*\)/, '');
-        element.style.transform += ` translateY(${moveY}px)`;
-    });
-});
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        // PDF Upload and Viewer functionality
+        const pdfUpload = document.getElementById('pdfUpload');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = document.querySelector('.progress-bar');
+        const pdfViewerContainer = document.getElementById('pdfViewerContainer');
+        const pdfFileName = document.getElementById('pdfFileName');
+        const pdfCanvas = document.getElementById('pdfCanvas');
+        const prevPageButton = document.getElementById('prevPage');
+        const nextPageButton = document.getElementById('nextPage');
+        const pageInfo = document.getElementById('pageInfo');
+        const zoomInButton = document.getElementById('zoomIn');
+        const zoomOutButton = document.getElementById('zoomOut');
 
-// PDF Upload and Viewer functionality
-const pdfUpload = document.getElementById('pdfUpload');
-const fileNameDisplay = document.getElementById('fileNameDisplay');
-const uploadButton = document.getElementById('uploadButton');
-const uploadProgress = document.getElementById('uploadProgress');
-const progressBar = document.querySelector('.progress-bar');
-const pdfViewerContainer = document.getElementById('pdfViewerContainer');
-const pdfFileName = document.getElementById('pdfFileName');
-const pdfCanvas = document.getElementById('pdfCanvas');
-const prevPageButton = document.getElementById('prevPage');
-const nextPageButton = document.getElementById('nextPage');
-const pageInfo = document.getElementById('pageInfo');
-const zoomInButton = document.getElementById('zoomIn');
-const zoomOutButton = document.getElementById('zoomOut');
+        // PDF rendering variables
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        let scale = 1.5;
+        let ctx = pdfCanvas.getContext('2d');
 
-// PDF rendering variables
-let pdfDoc = null;
-let pageNum = 1;
-let pageRendering = false;
-let pageNumPending = null;
-let scale = 1.5;
-let ctx = pdfCanvas.getContext('2d');
+        // Listen for file selection
+        pdfUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                if (file.type !== 'application/pdf') {
+                    alert('Please select a valid PDF file.');
+                    resetUploadForm();
+                    return;
+                }
+                
+                const fileName = file.name;
+                fileNameDisplay.textContent = fileName;
+                uploadButton.disabled = false;
+                
+                // Animate the label to show selection
+                const label = document.querySelector('.file-input-label');
+                label.style.borderColor = 'var(--primary-color)';
+                label.style.background = 'rgba(255, 255, 255, 0.2)';
+            } else {
+                resetUploadForm();
+            }
+        });
 
-// Listen for file selection
-pdfUpload.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-        const file = e.target.files[0];
-        if (file.type !== 'application/pdf') {
-            alert('Please select a valid PDF file.');
-            resetUploadForm();
-            return;
-        }
-        
-        const fileName = file.name;
-        fileNameDisplay.textContent = fileName;
-        uploadButton.disabled = false;
-        
-        // Animate the label to show selection
-        const label = document.querySelector('.file-input-label');
-        label.style.borderColor = 'var(--primary-color)';
-        label.style.background = 'rgba(255, 255, 255, 0.2)';
-    } else {
-        resetUploadForm();
-    }
-});
-
-// Handle upload button click
+        // Handle upload button click
+        uploadButton.addEventListener('click', () => {
+            if (pdfUpload.files.length === 0) return;
+            
+            const file = pdfUpload.files[0];
+            
+            // Show progress
+            uploadProgress.classList.remove('hidden');
+            uploadButton.disabled = true;
+            
+            // Simulate upload progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    // Load the PDF
+                    loadPDF(file);
+                }
+            }, 100);
+        });
+            // Modify the uploadButton click handler in paste.txt
 uploadButton.addEventListener('click', () => {
     if (pdfUpload.files.length === 0) return;
     
@@ -370,7 +389,286 @@ uploadButton.addEventListener('click', () => {
     uploadProgress.classList.remove('hidden');
     uploadButton.disabled = true;
     
-    // Simulate upload progress
+    // Create FormData to send the file
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('job_role', 'Software Engineer'); // You can make this selectable
+    
+    // Send to backend for analysis
+    fetch('/analyze', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Process results from the LLM analysis
+        console.log('Analysis results:', data);
+        
+        // Show results to the user (you'd need to create UI for this)
+        alert(`Profile rating: ${data.profile_rating.score}/100 - ${data.profile_rating.match_level}`);
+        
+        // Continue with the existing code to display the PDF
+        progressBar.style.width = '100%';
+        loadPDF(file);
+    })
+    .catch(error => {
+        console.error('Error analyzing PDF:', error);
+        alert('Error analyzing PDF. Please try again.');
+    })
+    .finally(() => {
+        // Hide upload progress 
+        // (or keep it visible until analysis is complete)
+        // uploadProgress.classList.add('hidden');
+        uploadButton.disabled = false;
+    });
+});
+        // Load and render PDF
+        function loadPDF(file) {
+            const fileReader = new FileReader();
+            
+            fileReader.onload = function(event) {
+                const typedarray = new Uint8Array(event.target.result);
+                
+                // Load the PDF using PDF.js
+                pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                    pdfDoc = pdf;
+                    pdfFileName.textContent = file.name;
+                    pageInfo.textContent = `Page ${pageNum} of ${pdf.numPages}`;
+                    
+                    // Enable/disable page navigation
+                    prevPageButton.disabled = pageNum <= 1;
+                    nextPageButton.disabled = pageNum >= pdf.numPages;
+                    
+                    // Render the first page
+                    renderPage(pageNum);
+                    
+                    // Show the PDF viewer
+                    pdfViewerContainer.classList.remove('hidden');
+                    
+                    // Hide upload progress
+                    uploadProgress.classList.add('hidden');
+                    
+                    // Re-enable upload button
+                    uploadButton.disabled = false;
+                }).catch(function(error) {
+                    console.error('Error loading PDF:', error);
+                    alert('Error loading PDF: ' + error.message);
+                    uploadProgress.classList.add('hidden');
+                    uploadButton.disabled = false;
+                });
+            };
+            
+            fileReader.readAsArrayBuffer(file);
+        }
+
+        // Render a specific page
+        function renderPage(num) {
+            pageRendering = true;
+            
+            // Using promise to fetch the page
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({ scale: scale });
+                pdfCanvas.height = viewport.height;
+                pdfCanvas.width = viewport.width;
+                
+                // Render PDF page into canvas context
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                
+                const renderTask = page.render(renderContext);
+                
+                // Wait for rendering to finish
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    
+                    if (pageNumPending !== null) {
+                        // New page rendering is pending
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+            
+            // Update page counters
+            pageInfo.textContent = `Page ${num} of ${pdfDoc.numPages}`;
+            
+            // Update button states
+            prevPageButton.disabled = num <= 1;
+            nextPageButton.disabled = num >= pdfDoc.numPages;
+        }
+
+        // Go to previous page
+        function goPrevPage() {
+            if (pageNum <= 1) return;
+            pageNum--;
+            queueRenderPage(pageNum);
+        }
+
+        // Go to next page
+        function goNextPage() {
+            if (pageNum >= pdfDoc.numPages) return;
+            pageNum++;
+            queueRenderPage(pageNum);
+        }
+
+        // Queue the page rendering if another page is currently rendering
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+        }
+
+        // Zoom in
+        function zoomIn() {
+            scale += 0.25;
+            renderPage(pageNum);
+        }
+
+        // Zoom out
+        function zoomOut() {
+            if (scale <= 0.5) return;
+            scale -= 0.25;
+            renderPage(pageNum);
+        }
+
+        // Add event listeners for controls
+        prevPageButton.addEventListener('click', goPrevPage);
+        nextPageButton.addEventListener('click', goNextPage);
+        zoomInButton.addEventListener('click', zoomIn);
+        zoomOutButton.addEventListener('click', zoomOut);
+
+        // Reset the form
+        function resetUploadForm() {
+            fileNameDisplay.textContent = 'Choose a PDF file';
+            uploadButton.disabled = true;
+            uploadProgress.classList.add('hidden');
+            progressBar.style.width = '0%';
+            
+            const label = document.querySelector('.file-input-label');
+            label.style.borderColor = 'var(--accent-color)';
+            label.style.background = 'rgba(255, 255, 255, 0.1)';
+        }
+
+        // Add drag and drop functionality
+        const fileInputLabel = document.querySelector('.file-input-label');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileInputLabel.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInputLabel.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInputLabel.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            fileInputLabel.style.borderColor = 'var(--primary-color)';
+            fileInputLabel.style.background = 'rgba(255, 255, 255, 0.25)';
+        }
+
+        function unhighlight() {
+            fileInputLabel.style.borderColor = 'var(--accent-color)';
+            fileInputLabel.style.background = 'rgba(255, 255, 255, 0.1)';
+        }
+
+        fileInputLabel.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                pdfUpload.files = files;
+                fileNameDisplay.textContent = files[0].name;
+                uploadButton.disabled = false;
+                
+                // Highlight the upload button
+                const label = document.querySelector('.file-input-label');
+                label.style.borderColor = 'var(--primary-color)';
+                label.style.background = 'rgba(255, 255, 255, 0.2)';
+            } else {
+                alert('Please upload a PDF file');
+            }
+        }
+
+        // Handle keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!pdfDoc) return;
+            
+            if (e.key === 'ArrowLeft') {
+                goPrevPage();
+            } else if (e.key === 'ArrowRight') {
+                goNextPage();
+            }
+        });
+
+        // Add subtle animation to background elements
+        const animateElements = () => {
+            const elements = document.querySelectorAll('.bg-element');
+            elements.forEach(element => {
+                const randomOffset = (Math.random() - 0.5) * 5;
+                
+                // Add subtle floating effect
+                element.style.transform = element.style.transform || '';
+                element.style.transform += ` translate(${randomOffset}px, ${randomOffset}px)`;
+                
+                // Reset after animation completes
+                setTimeout(() => {
+                    element.style.transform = element.style.transform.replace(/translate\([^)]*\)/, '');
+                }, 5000);
+            });
+            
+            // Continue animation loop
+            setTimeout(animateElements, 5000);
+        };
+
+        // Start animation loop
+        animateElements();
+        if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('Service Worker registered: ', reg))
+        .catch(err => console.log('Service Worker registration failed: ', err));
+    });
+  }
+  // Add this to your existing JavaScript, at the bottom of your script tag
+
+// Global variable to store the analysis results
+let analysisResults = null;
+
+// Update the uploadButton click handler to display results properly
+uploadButton.addEventListener('click', () => {
+    if (pdfUpload.files.length === 0) return;
+    
+    const file = pdfUpload.files[0];
+    
+    // Show progress
+    uploadProgress.classList.remove('hidden');
+    uploadButton.disabled = true;
+    
+    // Create FormData to send the file
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Get the job role (you could add a dropdown for this)
+    const jobRole = "Software Engineer"; // Default job role
+    formData.append('job_role', jobRole);
+    
+    // Show simulated progress while we either:
+    // 1. Wait for real backend (if deployed)
+    // 2. Use simulated data for demo purposes
     let progress = 0;
     const interval = setInterval(() => {
         progress += 5;
@@ -378,222 +676,315 @@ uploadButton.addEventListener('click', () => {
         
         if (progress >= 100) {
             clearInterval(interval);
-            // Load the PDF
-            loadPDF(file);
+            
+            // For a real backend, use this:
+            /*
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                analysisResults = data;
+                displayAnalysisResults(data);
+                loadPDF(file); // Still load the PDF for viewing
+            })
+            .catch(error => {
+                console.error('Error analyzing PDF:', error);
+                alert('Error analyzing PDF. Please try again.');
+            });
+            */
+            
+            // For demo purposes, use simulated data:
+            analysisResults = generateSimulatedResults(jobRole);
+            displayAnalysisResults(analysisResults);
+            loadPDF(file); // Still load the PDF for viewing
         }
     }, 100);
 });
 
-// Load and render PDF
-function loadPDF(file) {
-    const fileReader = new FileReader();
-    
-    fileReader.onload = function(event) {
-        const typedarray = new Uint8Array(event.target.result);
-        
-        // Load the PDF using PDF.js
-        pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
-            pdfDoc = pdf;
-            pdfFileName.textContent = file.name;
-            pageInfo.textContent = `Page ${pageNum} of ${pdf.numPages}`;
-            
-            // Enable/disable page navigation
-            prevPageButton.disabled = pageNum <= 1;
-            nextPageButton.disabled = pageNum >= pdf.numPages;
-            
-            // Render the first page
-            renderPage(pageNum);
-            
-            // Show the PDF viewer
-            pdfViewerContainer.classList.remove('hidden');
-            
-            // Hide upload progress
-            uploadProgress.classList.add('hidden');
-            
-            // Re-enable upload button
-            uploadButton.disabled = false;
-        }).catch(function(error) {
-            console.error('Error loading PDF:', error);
-            alert('Error loading PDF: ' + error.message);
-            uploadProgress.classList.add('hidden');
-            uploadButton.disabled = false;
-        });
+// Function to generate simulated results (for demo without backend)
+function generateSimulatedResults(jobRole) {
+    // This generates fake data similar to what your backend would return
+    return {
+        "job_role": jobRole,
+        "ai_generated": {
+            "score": 0.2,
+            "reasons": ["Natural language patterns", "Specific entity mentions", "Varied sentence structure"],
+            "is_ai_generated": "Low probability"
+        },
+        "certificate_verification": {
+            "score": 0.1,
+            "reasons": ["Recognized certification authorities", "Issue dates present", "Certificate IDs found"],
+            "fake_certificates": "Low probability"
+        },
+        "profile_rating": {
+            "score": 78,
+            "strengths": [
+                "Has 7/9 required skills: Python, Java, software development, algorithms, data structures, git, APIs",
+                "4+ years of relevant experience",
+                "Multiple quantifiable achievements",
+                "Has Bachelor's degree",
+                "Reasonably detailed profile"
+            ],
+            "weaknesses": [
+                "Missing key skills: software architecture, C++",
+                "Profile could be more comprehensive",
+                "Could improve quantification of achievements"
+            ],
+            "match_level": "Strong Match",
+            "component_scores": [
+                ["Skills Match", 31, 40],
+                ["Experience Quality", 25, 30],
+                ["Education", 10, 15],
+                ["Profile Quality", 12, 15]
+            ]
+        },
+        "analyzed_at": new Date().toISOString()
     };
-    
-    fileReader.readAsArrayBuffer(file);
 }
 
-// Render a specific page
-function renderPage(num) {
-    pageRendering = true;
+// Function to display analysis results
+function displayAnalysisResults(results) {
+    // Get reference to results container
+    const resultsContainer = document.getElementById('analysisResultsContainer');
     
-    // Using promise to fetch the page
-    pdfDoc.getPage(num).then(function(page) {
-        const viewport = page.getViewport({ scale: scale });
-        pdfCanvas.height = viewport.height;
-        pdfCanvas.width = viewport.width;
+    // Step 1: Display overall score and match level
+    document.getElementById('overallScore').textContent = results.profile_rating.score;
+    document.getElementById('matchLevel').textContent = results.profile_rating.match_level;
+    document.getElementById('jobRoleDisplay').textContent = results.job_role;
+    
+    // Set the score circle background based on the score
+    const scoreCircle = document.querySelector('.score-circle');
+    const scorePercentage = results.profile_rating.score;
+    scoreCircle.style.background = `conic-gradient(var(--primary-color) 0%, var(--primary-color) ${scorePercentage}%, rgba(110, 87, 255, 0.3) ${scorePercentage}%)`;
+    
+    // Step 2: Display skills assessment
+    const skillsChart = document.getElementById('skillsChart');
+    skillsChart.innerHTML = ''; // Clear existing content
+    
+    // Extract skill scores from component_scores
+    const skillsComponent = results.profile_rating.component_scores.find(comp => comp[0] === "Skills Match");
+    const skillsScore = skillsComponent ? skillsComponent[1] : 0;
+    const skillsMaxScore = skillsComponent ? skillsComponent[2] : 40;
+    const skillsPercentage = (skillsScore / skillsMaxScore) * 100;
+    
+    // Add other component scores as well
+    results.profile_rating.component_scores.forEach(comp => {
+        const [name, score, maxScore] = comp;
+        const percentage = (score / maxScore) * 100;
         
-        // Render PDF page into canvas context
-        const renderContext = {
-            canvasContext: ctx,
-            viewport: viewport
-        };
-        
-        const renderTask = page.render(renderContext);
-        
-        // Wait for rendering to finish
-        renderTask.promise.then(function() {
-            pageRendering = false;
+        const skillItem = document.createElement('div');
+        skillItem.className = 'skill-item';
+        skillItem.innerHTML = `
+            <div class="skill-header">
+                <span class="skill-name">${name}</span>
+                <span class="skill-score">${score}/${maxScore}</span>
+            </div>
+            <div class="skill-bar">
+                <div class="skill-progress" style="width: ${percentage}%"></div>
+            </div>
+        `;
+        skillsChart.appendChild(skillItem);
+    });
+    
+    // Step 3: Display strengths
+    const strengthsList = document.getElementById('strengthsList');
+    strengthsList.innerHTML = ''; // Clear existing content
+    
+    results.profile_rating.strengths.forEach(strength => {
+        const li = document.createElement('li');
+        li.textContent = strength;
+        strengthsList.appendChild(li);
+    });
+    
+    // Step 4: Display weaknesses
+    const weaknessesList = document.getElementById('weaknessesList');
+    weaknessesList.innerHTML = ''; // Clear existing content
+    
+    results.profile_rating.weaknesses.forEach(weakness => {
+        const li = document.createElement('li');
+        li.textContent = weakness;
+        weaknessesList.appendChild(li);
+    });
+    
+    // Step 5: Display verification information
+    // AI Detection
+    const aiDetectionBadge = document.getElementById('aiDetectionBadge');
+    const aiDetectionText = document.getElementById('aiDetectionText');
+    const aiReasonsList = document.getElementById('aiReasonsList');
+    
+    aiDetectionBadge.textContent = results.ai_generated.is_ai_generated.split(' ')[0]; // Get first word (Low/Medium/High)
+    aiDetectionBadge.className = `badge ${results.ai_generated.is_ai_generated.split(' ')[0].toLowerCase()}`;
+    
+    aiDetectionText.textContent = `AI-generated content: ${results.ai_generated.is_ai_generated}`;
+    
+    aiReasonsList.innerHTML = ''; // Clear existing content
+    results.ai_generated.reasons.forEach(reason => {
+        const li = document.createElement('li');
+        li.textContent = reason;
+        aiReasonsList.appendChild(li);
+    });
+    
+    // Certificate Verification
+    const certVerificationBadge = document.getElementById('certVerificationBadge');
+    const certVerificationText = document.getElementById('certVerificationText');
+    const certReasonsList = document.getElementById('certReasonsList');
+    
+    const certLevel = results.certificate_verification.fake_certificates.split(' ')[0]; // Get first word (Low/Medium/High)
+    certVerificationBadge.textContent = certLevel;
+    
+    if (certLevel.toLowerCase() === 'low') {
+        certVerificationBadge.className = 'badge low';
+    } else if (certLevel.toLowerCase() === 'medium') {
+        certVerificationBadge.className = 'badge medium';
+    } else {
+        certVerificationBadge.className = 'badge high';
+    }
+    
+    certVerificationText.textContent = `Fake certificates: ${results.certificate_verification.fake_certificates}`;
+    
+    certReasonsList.innerHTML = ''; // Clear existing content
+    results.certificate_verification.reasons.forEach(reason => {
+        const li = document.createElement('li');
+        li.textContent = reason;
+        certReasonsList.appendChild(li);
+    });
+    
+    // Step 6: Generate and display recommendations
+    const recommendationsList = document.getElementById('recommendationsList');
+    recommendationsList.innerHTML = ''; // Clear existing content
+    
+    // Generate recommendations based on weaknesses
+    const recommendations = generateRecommendations(results);
+    recommendations.forEach(recommendation => {
+        const li = document.createElement('li');
+        li.textContent = recommendation;
+        recommendationsList.appendChild(li);
+    });
+    
+    // Step 7: Set up tab switching functionality
+    setupTabs();
+    
+    // Step 8: Set up button event listeners
+    document.getElementById('downloadReport').addEventListener('click', () => {
+        generatePDFReport(results);
+    });
+    
+    document.getElementById('closeAnalysis').addEventListener('click', () => {
+        resultsContainer.classList.add('hidden');
+    });
+    
+    // Finally, show the results container
+    resultsContainer.classList.remove('hidden');
+}
+
+// Function to generate recommendations based on analysis results
+function generateRecommendations(results) {
+    const recommendations = [];
+    
+    // Add skill-based recommendations
+    if (results.profile_rating.weaknesses.some(w => w.includes("Missing key skills"))) {
+        const missingSkills = results.profile_rating.weaknesses.find(w => w.includes("Missing key skills"));
+        if (missingSkills) {
+            recommendations.push(`Add the missing skills to your profile: ${missingSkills.replace("Missing key skills: ", "")}`);
+        }
+    }
+    
+    // Add experience-based recommendations
+    if (results.profile_rating.weaknesses.some(w => w.includes("quantifiable achievements"))) {
+        recommendations.push("Add more measurable achievements with specific metrics (%, $, time saved, etc.)");
+    }
+    
+    // Add education recommendations
+    if (results.profile_rating.weaknesses.some(w => w.includes("degree"))) {
+        recommendations.push("Make your educational background more prominent in your profile");
+    }
+    
+    // Add general profile recommendations
+    if (results.profile_rating.weaknesses.some(w => w.includes("incomplete"))) {
+        recommendations.push("Complete all sections of your profile for better visibility");
+    }
+    
+    if (results.profile_rating.weaknesses.some(w => w.includes("lacks detail"))) {
+        recommendations.push("Add more detailed descriptions of your roles and responsibilities");
+    }
+    
+    // If there are no specific recommendations, add some general ones
+    if (recommendations.length === 0) {
+        recommendations.push("Keep your skills and certifications updated regularly");
+        recommendations.push("Add recent projects and achievements to showcase your latest work");
+    }
+    
+    // Limit to 5 recommendations
+    return recommendations.slice(0, 5);
+}
+
+// Function to set up tab switching
+function setupTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons and panels
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabPanels.forEach(panel => panel.classList.remove('active'));
             
-            if (pageNumPending !== null) {
-                // New page rendering is pending
-                renderPage(pageNumPending);
-                pageNumPending = null;
-            }
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            // Show corresponding panel
+            const tabId = button.getAttribute('data-tab');
+            document.getElementById(`${tabId}Panel`).classList.add('active');
         });
     });
+}
+
+// Function to generate a PDF report (placeholder - would need PDF.js or another library)
+function generatePDFReport(results) {
+    // This would be implemented with a PDF generation library
+    alert("Report generation feature coming soon!");
     
-    // Update page counters
-    pageInfo.textContent = `Page ${num} of ${pdfDoc.numPages}`;
+    // For a real implementation, you would:
+    // 1. Create a PDF with the results
+    // 2. Offer it as a download
+    console.log("Would generate PDF with:", results);
+}
+uploadButton.addEventListener('click', () => {
+    if (pdfUpload.files.length === 0) return;
     
-    // Update button states
-    prevPageButton.disabled = num <= 1;
-    nextPageButton.disabled = num >= pdfDoc.numPages;
-}
-
-// Go to previous page
-function goPrevPage() {
-    if (pageNum <= 1) return;
-    pageNum--;
-    queueRenderPage(pageNum);
-}
-
-// Go to next page
-function goNextPage() {
-    if (pageNum >= pdfDoc.numPages) return;
-    pageNum++;
-    queueRenderPage(pageNum);
-}
-
-// Queue the page rendering if another page is currently rendering
-function queueRenderPage(num) {
-    if (pageRendering) {
-        pageNumPending = num;
-    } else {
-        renderPage(num);
-    }
-}
-
-// Zoom in
-function zoomIn() {
-    scale += 0.25;
-    renderPage(pageNum);
-}
-
-// Zoom out
-function zoomOut() {
-    if (scale <= 0.5) return;
-    scale -= 0.25;
-    renderPage(pageNum);
-}
-
-// Add event listeners for controls
-prevPageButton.addEventListener('click', goPrevPage);
-nextPageButton.addEventListener('click', goNextPage);
-zoomInButton.addEventListener('click', zoomIn);
-zoomOutButton.addEventListener('click', zoomOut);
-
-// Reset the form
-function resetUploadForm() {
-    fileNameDisplay.textContent = 'Choose a PDF file';
+    const file = pdfUpload.files[0];
+    
+    // Show progress
+    uploadProgress.classList.remove('hidden');
     uploadButton.disabled = true;
-    uploadProgress.classList.add('hidden');
-    progressBar.style.width = '0%';
     
-    const label = document.querySelector('.file-input-label');
-    label.style.borderColor = 'var(--accent-color)';
-    label.style.background = 'rgba(255, 255, 255, 0.1)';
-}
-
-// Add drag and drop functionality
-const fileInputLabel = document.querySelector('.file-input-label');
-
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    fileInputLabel.addEventListener(eventName, preventDefaults, false);
-});
-
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-['dragenter', 'dragover'].forEach(eventName => {
-    fileInputLabel.addEventListener(eventName, highlight, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-    fileInputLabel.addEventListener(eventName, unhighlight, false);
-});
-
-function highlight() {
-    fileInputLabel.style.borderColor = 'var(--primary-color)';
-    fileInputLabel.style.background = 'rgba(255, 255, 255, 0.25)';
-}
-
-function unhighlight() {
-    fileInputLabel.style.borderColor = 'var(--accent-color)';
-    fileInputLabel.style.background = 'rgba(255, 255, 255, 0.1)';
-}
-
-fileInputLabel.addEventListener('drop', handleDrop, false);
-
-function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
+    // Create FormData to send the file
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('job_role', 'Software Engineer'); // You can make this selectable
     
-    if (files.length > 0 && files[0].type === 'application/pdf') {
-        pdfUpload.files = files;
-        fileNameDisplay.textContent = files[0].name;
+    // Send to backend for analysis
+    fetch('/analyze', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Redirect to the analysis results page
+        window.location.href = 'analysis_results.html';
+    })
+    .catch(error => {
+        console.error('Error analyzing PDF:', error);
+        alert('Error analyzing PDF. Please try again.');
+    })
+    .finally(() => {
+        // Hide upload progress
+        uploadProgress.classList.add('hidden');
         uploadButton.disabled = false;
-        
-        // Highlight the upload button
-        const label = document.querySelector('.file-input-label');
-        label.style.borderColor = 'var(--primary-color)';
-        label.style.background = 'rgba(255, 255, 255, 0.2)';
-    } else {
-        alert('Please upload a PDF file');
-    }
-}
-
-// Handle keyboard navigation
-document.addEventListener('keydown', (e) => {
-    if (!pdfDoc) return;
-    
-    if (e.key === 'ArrowLeft') {
-        goPrevPage();
-    } else if (e.key === 'ArrowRight') {
-        goNextPage();
-    }
-});
-// Add subtle animation to background elements
-const animateElements = () => {
-    const elements = document.querySelectorAll('.bg-element');
-    elements.forEach(element => {
-        const randomOffset = (Math.random() - 0.5) * 5;
-        
-        // Add subtle floating effect
-        element.style.transform = element.style.transform || '';
-        element.style.transform += ` translate(${randomOffset}px, ${randomOffset}px)`;
-        
-        // Reset after animation completes
-        setTimeout(() => {
-            element.style.transform = element.style.transform.replace(/translate\([^)]*\)/, '');
-        }, 5000);
     });
-    
-    // Continue animation loop
-    setTimeout(animateElements, 5000);
-};
-
-// Start animation loop
-animateElements();
+});
+    </script>
+</body>
+</html>

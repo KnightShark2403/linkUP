@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="analysisResultsContainer">
+        <div class="results-header">
+            <h2><i class="fas fa-chart-bar"></i> Resume Analysis Results</h2>
+        </div>
+        
+        <div class="results-content">
+            <!-- Overall Score -->
+            <div class="score-card">
+                <div class="score-circle">
+                    <div id="overallScore" class="score-value">0</div>
+                </div>
+                <div class="score-text">
+                    <h3 id="matchLevel">No Results</h3>
+                    <p>Match for <span id="jobRoleDisplay">Software Engineer</span></p>
+                </div>
+            </div>
+            
+            <!-- Detailed Analysis Tabs -->
+            <div class="analysis-tabs">
+                <div class="tab-headers">
+                    <button class="tab-button active" data-tab="skills">Skills</button>
+                    <button class="tab-button" data-tab="strengths">Strengths</button>
+                    <button class="tab-button" data-tab="weaknesses">Improvement Areas</button>
+                    <button class="tab-button" data-tab="verification">Verification</button>
+                </div>
+                
+                <div class="tab-content">
+                    <!-- Skills Analysis -->
+                    <div class="tab-panel active" id="skillsPanel">
+                        <h3>Skills Assessment</h3>
+                        <div id="skillsChart" class="skills-chart"></div>
+                    </div>
+                    
+                    <!-- Strengths Analysis -->
+                    <div class="tab-panel" id="strengthsPanel">
+                        <h3>Profile Strengths</h3>
+                        <ul id="strengthsList" class="list-items"></ul>
+                    </div>
+                    
+                    <!-- Weaknesses Analysis -->
+                    <div class="tab-panel" id="weaknessesPanel">
+                        <h3>Areas for Improvement</h3>
+                        <ul id="weaknessesList" class="list-items"></ul>
+                    </div>
+                    
+                    <!-- Verification Analysis -->
+                    <div class="tab-panel" id="verificationPanel">
+                        <h3>Profile Verification</h3>
+                        
+                        <div class="verification-item">
+                            <div class="verification-header">
+                                <i class="fas fa-robot"></i>
+                                <h4>AI Content Detection</h4>
+                                <span id="aiDetectionBadge" class="badge">Low</span>
+                            </div>
+                            <div class="verification-details">
+                                <p id="aiDetectionText">No AI generated content detected.</p>
+                                <ul id="aiReasonsList" class="reasons-list"></ul>
+                            </div>
+                        </div>
+                        
+                        <div class="verification-item">
+                            <div class="verification-header">
+                                <i class="fas fa-certificate"></i>
+                                <h4>Certificate Verification</h4>
+                                <span id="certVerificationBadge" class="badge">Valid</span>
+                            </div>
+                            <div class="verification-details">
+                                <p id="certVerificationText">Certificates appear to be valid.</p>
+                                <ul id="certReasonsList" class="reasons-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Job Recommendations -->
+            <div class="recommendations-section">
+                <h3>Recommendations</h3>
+                <div id="recommendationsContent" class="recommendations-content">
+                    <p>Based on your profile, we recommend the following improvements:</p>
+                    <ul id="recommendationsList" class="recommendations-list"></ul>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="actions-footer">
+                <button id="downloadReport" class="action-button">
+                    <i class="fas fa-download"></i> Download Report
+                </button>
+                <button id="closeAnalysis" class="action-button secondary">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to display analysis results
+        function displayAnalysisResults(results) {
+            // Update overall score and match level
+            document.getElementById('overallScore').textContent = results.profile_rating.score;
+            document.getElementById('matchLevel').textContent = results.profile_rating.match_level;
+            document.getElementById('jobRoleDisplay').textContent = results.job_role;
+            
+            // Update skills assessment
+            const skillsChart = document.getElementById('skillsChart');
+            skillsChart.innerHTML = '';
+            results.profile_rating.component_scores.forEach(comp => {
+                const [name, score, maxScore] = comp;
+                const percentage = (score / maxScore) * 100;
+                
+                const skillItem = document.createElement('div');
+                skillItem.className = 'skill-item';
+                skillItem.innerHTML = `
+                    <div class="skill-header">
+                        <span class="skill-name">${name}</span>
+                        <span class="skill-score">${score}/${maxScore}</span>
+                    </div>
+                    <div class="skill-bar">
+                        <div class="skill-progress" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                skillsChart.appendChild(skillItem);
+            });
+            
+            // Update strengths
+            const strengthsList = document.getElementById('strengthsList');
+            strengthsList.innerHTML = '';
+            results.profile_rating.strengths.forEach(strength => {
+                const li = document.createElement('li');
+                li.textContent = strength;
+                strengthsList.appendChild(li);
+            });
+            
+            // Update weaknesses
+            const weaknessesList = document.getElementById('weaknessesList');
+            weaknessesList.innerHTML = '';
+            results.profile_rating.weaknesses.forEach(weakness => {
+                const li = document.createElement('li');
+                li.textContent = weakness;
+                weaknessesList.appendChild(li);
+            });
+            
+            // Update verification information
+            const aiDetectionBadge = document.getElementById('aiDetectionBadge');
+            const aiDetectionText = document.getElementById('aiDetectionText');
+            const aiReasonsList = document.getElementById('aiReasonsList');
+            
+            aiDetectionBadge.textContent = results.ai_generated.is_ai_generated.split(' ')[0];
+            aiDetectionBadge.className = `badge ${results.ai_generated.is_ai_generated.split(' ')[0].toLowerCase()}`;
+            aiDetectionText.textContent = `AI-generated content: ${results.ai_generated.is_ai_generated}`;
+            aiReasonsList.innerHTML = '';
+            results.ai_generated.reasons.forEach(reason => {
+                const li = document.createElement('li');
+                li.textContent = reason;
+                aiReasonsList.appendChild(li);
+            });
+            
+            const certVerificationBadge = document.getElementById('certVerificationBadge');
+            const certVerificationText = document.getElementById('certVerificationText');
+            const certReasonsList = document.getElementById('certReasonsList');
+            
+            const certLevel = results.certificate_verification.fake_certificates.split(' ')[0];
+            certVerificationBadge.textContent = certLevel;
+            certVerificationBadge.className = `badge ${certLevel.toLowerCase()}`;
+            certVerificationText.textContent = `Fake certificates: ${results.certificate_verification.fake_certificates}`;
+            certReasonsList.innerHTML = '';
+            results.certificate_verification.reasons.forEach(reason => {
+                const li = document.createElement('li');
+                li.textContent = reason;
+                certReasonsList.appendChild(li);
+            });
+            
+            // Generate and display recommendations
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = '';
+            const recommendations = generateRecommendations(results);
+            recommendations.forEach(recommendation => {
+                const li = document.createElement('li');
+                li.textContent = recommendation;
+                recommendationsList.appendChild(li);
+            });
+        }
+
+        // Function to generate recommendations based on analysis results
+        function generateRecommendations(results) {
+            const recommendations = [];
+            
+            if (results.profile_rating.weaknesses.some(w => w.includes("Missing key skills"))) {
+                const missingSkills = results.profile_rating.weaknesses.find(w => w.includes("Missing key skills"));
+                if (missingSkills) {
+                    recommendations.push(`Add the missing skills to your profile: ${missingSkills.replace("Missing key skills: ", "")}`);
+                }
+            }
+            
+            if (results.profile_rating.weaknesses.some(w => w.includes("quantifiable achievements"))) {
+                recommendations.push("Add more measurable achievements with specific metrics (%, $, time saved, etc.)");
+            }
+            
+            if (results.profile_rating.weaknesses.some(w => w.includes("degree"))) {
+                recommendations.push("Make your educational background more prominent in your profile");
+            }
+            
+            if (results.profile_rating.weaknesses.some(w => w.includes("incomplete"))) {
+                recommendations.push("Complete all sections of your profile for better visibility");
+            }
+            
+            if (results.profile_rating.weaknesses.some(w => w.includes("lacks detail"))) {
+                recommendations.push("Add more detailed descriptions of your roles and responsibilities");
+            }
+            
+            if (recommendations.length === 0) {
+                recommendations.push("Keep your skills and certifications updated regularly");
+                recommendations.push("Add recent projects and achievements to showcase your latest work");
+            }
+            
+            return recommendations.slice(0, 5);
+        }
+
+        // Fetch results from the backend and display them
+        function fetchAndDisplayResults() {
+            fetch('/analyze')
+                .then(response => response.json())
+                .then(data => {
+                    displayAnalysisResults(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching analysis results:', error);
+                });
+        }
+
+        // Call the function to fetch and display results when the page loads
+        fetchAndDisplayResults();
+    </script>
+</body>
+</html>
