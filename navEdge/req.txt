@@ -1,5 +1,0 @@
-plotly
-streamlit
-requests
-pandas
-collections
